@@ -6,12 +6,13 @@ import itertools
 trials_per_config = 1000
 best_config = []
 best_rate = 0
+enforce_card_use = False
 
 def run_trial(cards, drawn, energy, locked):
     random.shuffle(cards)
     hand = cards[:drawn]
     # early outs before we to the MATHS
-    if not sum(hand) == energy:
+    if not sum(hand) >= energy:
         return False
     if not locked[0] and not any(x for x in hand[:4] if x == 1):
         return False
@@ -25,12 +26,13 @@ def run_trial(cards, drawn, energy, locked):
         ones_by_three += 1
     if ones_by_three < 2 and len([x for x in hand[:drawn_by_2 + 1] if x == 3]) == 0:
         return False
-    if len([x for x in hand if x >= 4]) > 3:
-        return False
-    if len([x for x in hand if x >= 5]) > 2:
-        return False
-    if len([x for x in hand if x >= 6]) > 1:
-        return False
+    if enforce_card_use:
+        if len([x for x in hand if x >= 4]) > 3:
+            return False
+        if len([x for x in hand if x >= 5]) > 2:
+            return False
+        if len([x for x in hand if x >= 6]) > 1:
+            return False
     # MATHS
     for i in range(6): # Add the locked cards back in so that the MATHS can avoid special casing it
         if locked[i]:
@@ -125,14 +127,14 @@ def reset_globals():
 
 if __name__ == '__main__':
     #import pdb;pdb.set_trace()
-    try_configs([False, False, False, False, False, False], [1] * 6)
+    try_configs([False, False, False, False, False, False], [0] * 6)
     print(f"No fixed: {best_config}, {best_rate:2.7%}")
     reset_globals()
-    try_configs([True, False, False, False, False, False], [1] * 6)
+    try_configs([True, False, False, False, False, False], [0] * 6)
     print(f"With Quicksilver: {best_config}, {best_rate:2.7%}")
     reset_globals()
-    try_configs([False, True, False, False, False, False], [1] * 6)
+    try_configs([False, True, False, False, False, False], [0] * 6)
     print(f"With Domina: {best_config}, {best_rate:2.7%}")
     reset_globals()
-    try_configs([True, True, False, False, False, False], [1] * 6)
+    try_configs([True, True, False, False, False, False], [0] * 6)
     print(f"With Both: {best_config}, {best_rate:2.7%}")
